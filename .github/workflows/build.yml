@@ -1,0 +1,39 @@
+name: Build and deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-wikidle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build the Docker image
+        uses: docker/build-push-action@v5.1.0
+        with:
+          context: ./services/graphql
+          file: ./services/graphql/Dockerfile
+          push: true
+          tags: gbandres/taca:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    needs: [build-wikidle]
+
+    steps:
+      - name: ssh and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            ./update-services.sh

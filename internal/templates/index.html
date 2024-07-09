@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.conditional.sand.min.css"
+    />
+    <script
+      src="https://unpkg.com/htmx.org@1.9.10"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+    ></script>
+    <script src="{{ .BaseUrl }}/game.js"></script>
+    <link rel="stylesheet" href="{{ .BaseUrl }}/style.css" />
+    <title>Wikidle</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="pico controls">
+        <hgroup>
+          <h1>Wikidle</h1>
+          <p id="motd">{{ .MOTD }}</p>
+        </hgroup>
+        <div>
+          <div class="attempts" id="attempts">{{ .Attempts }}</div>
+          <form
+            hx-post="{{ .BaseUrl }}/search"
+            hx-swap="beforeend"
+            hx-target="#attempts"
+            hx-on::after-request="this.reset()"
+          >
+            <div class="word-input-wrapper" id="word-input-wrapper">
+              <input
+                class="word-input"
+                name="q"
+                id="search"
+                placeholder="Prueba una palabra..."
+              />
+              <button class="word-input-button" type="submit">
+                <img src="{{ .BaseUrl }}/img/search.svg" alt="Buscar" />
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <main class="container">
+        <div id="article">{{ .Article }}</div>
+      </main>
+    </div>
+    {{ if .Won }}
+    <script>
+      onGameWin();
+    </script>
+    {{ end }}
+  </body>
+</html>
