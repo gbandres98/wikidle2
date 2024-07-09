@@ -18,12 +18,14 @@ import (
 )
 
 type Api struct {
-	db *store.Queries
+	db          *store.Queries
+	baseAddress string
 }
 
-func New(db *store.Queries) *Api {
+func New(db *store.Queries, baseAddress string) *Api {
 	return &Api{
-		db: db,
+		db:          db,
+		baseAddress: baseAddress,
 	}
 }
 
@@ -164,7 +166,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			MOTD     string
 			Won      bool
 		}{
-			BaseUrl:  "http://192.168.1.100:8080",
+			BaseUrl:  a.baseAddress,
 			Article:  newArticle,
 			Attempts: attempts,
 			MOTD:     motd,

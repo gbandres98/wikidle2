@@ -46,7 +46,7 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_BASE_ADDRESS"},
 				Usage:       "Base address for web content",
 				Value:       "http://192.168.1.100:8080",
-				Destination: &addr,
+				Destination: &baseAddress,
 			},
 		},
 	}
@@ -68,7 +68,7 @@ func start(c *cli.Context) error {
 
 	mux.Handle("GET /{file...}", http.FileServerFS(static.FS()))
 
-	game := game.New(db)
+	game := game.New(db, baseAddress)
 	game.RegisterHandlers(mux)
 
 	log.Printf("Server started at %s\n", addr)
