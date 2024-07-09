@@ -23,7 +23,6 @@ require (
 require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/dlclark/regexp2 v1.11.0
-	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/pressly/goose/v3 v3.21.1
 	golang.org/x/net v0.23.0 // indirect
 )
