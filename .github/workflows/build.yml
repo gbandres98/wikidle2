@@ -18,8 +18,8 @@ jobs:
       - name: Build the Docker image
         uses: docker/build-push-action@v5.1.0
         with:
-          context: ./services/graphql
-          file: ./services/graphql/Dockerfile
+          context: ./
+          file: ./cmd/wikidle/Dockerfile
           push: true
           tags: gbandres/taca:latest
 
