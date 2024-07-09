@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var dbUrl, dbDriver, addr string
+var dbUrl, dbDriver, addr, baseAddress string
 
 func main() {
 	app := &cli.App{
@@ -39,6 +39,13 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_LISTEN_ADDRESS"},
 				Usage:       "Address to listen on",
 				Value:       "0.0.0.0:8080",
+				Destination: &addr,
+			},
+			&cli.StringFlag{
+				Name:        "base-addr",
+				EnvVars:     []string{"WIKIDLE_BASE_ADDRESS"},
+				Usage:       "Base address for web content",
+				Value:       "http://192.168.1.100:8080",
 				Destination: &addr,
 			},
 		},
