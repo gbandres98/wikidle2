@@ -21,7 +21,7 @@ jobs:
           context: ./
           file: ./cmd/wikidle/Dockerfile
           push: true
-          tags: gbandres/taca:latest
+          tags: gbandres/wikidle:latest
 
   deploy:
     runs-on: ubuntu-latest
