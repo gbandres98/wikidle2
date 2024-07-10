@@ -31,7 +31,7 @@ func (a *Api) init(gameData GameData, article parser.Article) (newArticle templa
 
 	attemptsHtml := ""
 
-	for _, word := range gameData.Words {
+	for i, word := range gameData.Words {
 		hits := 0
 
 		if indexes, ok := article.Tokens[parser.Normalize(word)]; ok {
@@ -41,7 +41,7 @@ func (a *Api) init(gameData GameData, article parser.Article) (newArticle templa
 			}
 		}
 
-		attemptsHtml += fmt.Sprintf(`<small>%s - %d aciertos</small>`, word, hits)
+		attemptsHtml += fmt.Sprintf(`<small>%d. %s - %d aciertos</small>`, i, word, hits)
 	}
 
 	articleHtml, err := doc.Html()

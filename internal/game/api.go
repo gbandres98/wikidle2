@@ -111,7 +111,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 
-		_, err = w.Write([]byte(fmt.Sprintf(`<small>%s - %d aciertos</small>`, r.FormValue("q"), hits)))
+		_, err = w.Write([]byte(fmt.Sprintf(`<small>%d. %s - %d aciertos</small>`, len(gameData.Words), r.FormValue("q"), hits)))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

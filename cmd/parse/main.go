@@ -1,15 +1,19 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gbandres98/wikidle2/internal/parser"
 	"github.com/gbandres98/wikidle2/internal/store"
+	"github.com/robfig/cron"
 	"github.com/urfave/cli/v2"
 )
 
-var dbUrl, dbDriver string
+var dbUrl, dbDriver, cronString string
 
 func main() {
 	app := &cli.App{
@@ -22,6 +26,7 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_DATABASE_DRIVER"},
 				Usage:       "Database driver to use (sqlite3, postgres)",
 				Value:       "sqlite3",
+				Required:    true,
 				Destination: &dbDriver,
 			},
 			&cli.StringFlag{
@@ -29,7 +34,15 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_DATABASE_DSN"},
 				Usage:       "Database connection string",
 				Value:       "file::memory:?cache=shared",
+				Required:    true,
 				Destination: &dbUrl,
+			},
+			&cli.StringFlag{
+				Name:        "cron",
+				EnvVars:     []string{"WIKIDLE_PARSER_CRON"},
+				Usage:       "Cron to run the article parsing job",
+				Value:       "0 0 * * *",
+				Destination: &cronString,
 			},
 		},
 	}
@@ -47,7 +60,45 @@ func start(c *cli.Context) error {
 		return err
 	}
 
-	parser.New(db)
+	p := parser.New(db)
+
+	_, err = db.GetArticleByID(ctx, parser.GetGameID(time.Now()))
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("Error getting retrieving article from db: %v", err)
+	}
+
+	if err == sql.ErrNoRows {
+		log.Println("No article in db, parsing article from queue")
+		articleTitle, err := p.GetArticleTitleFromQueue(ctx)
+		if err != nil {
+			return err
+		}
+
+		err = p.ParseArticle(ctx, articleTitle)
+		if err != nil {
+			return err
+		}
+	}
+
+	cr := cron.New()
+
+	err = cr.AddFunc(cronString, func() {
+		articleTitle, err := p.GetArticleTitleFromQueue(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		err = p.ParseArticle(ctx, articleTitle)
+		if err != nil {
+			panic(err)
+		}
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Println("Started cron schedule")
+	cr.Run()
 
 	return nil
 }
