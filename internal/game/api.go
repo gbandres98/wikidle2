@@ -63,6 +63,13 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			}
 		}
 
+		for _, word := range parser.ExcludedWords {
+			if word == parser.Normalize(newWord) {
+				w.WriteHeader(http.StatusAccepted)
+				return
+			}
+		}
+
 		gameData.Words = append(gameData.Words, newWord)
 
 		won := checkGameWin(gameData, article)

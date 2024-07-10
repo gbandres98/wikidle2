@@ -40,6 +40,8 @@ func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 		Words:       make(map[int]string),
 	}
 
+	article.Title = strings.Replace(article.Title, "_", " ", -1)
+
 	res, err := http.Get("https://es.wikipedia.org/api/rest_v1/page/html/" + url.PathEscape(article.Title))
 	if err != nil {
 		return err
@@ -114,6 +116,11 @@ func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 
 	doc.Find("span.obscured").Each(func(i int, s *goquery.Selection) {
 		word := Normalize(s.Text())
+
+		if IsExcludedWord(word) {
+			return
+		}
+
 		if _, ok := article.Tokens[word]; !ok {
 			article.Tokens[word] = []int{}
 		}

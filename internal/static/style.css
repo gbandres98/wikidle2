@@ -106,3 +106,13 @@ figure {
         width: unset;
     }
 }
+
+table {
+    width: 100% !important;
+}
+
+@media (min-width: 576px) {
+    table {
+        width: unset;
+    }
+}

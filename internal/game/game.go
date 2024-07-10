@@ -60,7 +60,7 @@ func checkGameWin(gameData GameData, article parser.Article) bool {
 
 	for _, titleToken := range article.TitleTokens {
 		for _, word := range gameData.Words {
-			if parser.Normalize(word) == titleToken {
+			if parser.Normalize(word) == titleToken || parser.IsExcludedWord(titleToken) {
 				remaining--
 				break
 			}
