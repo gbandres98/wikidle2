@@ -98,23 +98,10 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 
-		hits := 0
-
-		if indexes, ok := article.Tokens[parser.Normalize(newWord)]; ok {
-			for _, i := range indexes {
-				word, ok := article.Words[i]
-				if !ok {
-					continue
-				}
-
-				_, err = w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="hit">%s</span>`, i, word)))
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				hits++
-			}
+		hits, err := writeHits(w, newWord, article)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		_, err = w.Write([]byte(fmt.Sprintf(`<small>%s - %d aciertos</small>`, r.FormValue("q"), hits)))

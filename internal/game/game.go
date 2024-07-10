@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"net/http"
 	"strings"
 	"time"
 
@@ -90,4 +91,26 @@ func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
 	a.cachedArticle = article
 
 	return article, nil
+}
+
+func writeHits(w http.ResponseWriter, word string, article parser.Article) (int, error) {
+	hits := 0
+
+	if indexes, ok := article.Tokens[parser.Normalize(word)]; ok {
+		for _, i := range indexes {
+			word, ok := article.Words[i]
+			if !ok {
+				continue
+			}
+
+			_, err := w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="hit">%s</span>`, i, word)))
+			if err != nil {
+				return 0, err
+			}
+
+			hits++
+		}
+	}
+
+	return hits, nil
 }
