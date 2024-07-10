@@ -50,7 +50,7 @@ func (p *Parser) GetArticleTitleFromQueue(ctx context.Context) (string, error) {
 	}
 
 	if err == nil {
-		//err = p.db.DeleteQueueArticle(ctx, article.ID)
+		err = p.db.DeleteQueueArticle(ctx, article.ID)
 		if err != nil {
 			return "", fmt.Errorf("failed to delete article from queue: %w", err)
 		}
