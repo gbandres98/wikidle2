@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/dlclark/regexp2"
@@ -30,10 +31,10 @@ type Article struct {
 	UnobscuredHTML template.HTML
 }
 
-func (p *Parser) ParseArticle(ctx context.Context) error {
+func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 	article := Article{
 		ID:          GetGameID(time.Now()),
-		Title:       "Virreinato del Perú",
+		Title:       articleTitle,
 		Tokens:      make(map[string][]int),
 		TitleTokens: make([]string, 0),
 		Words:       make(map[int]string),
@@ -120,7 +121,7 @@ func (p *Parser) ParseArticle(ctx context.Context) error {
 		article.Words[i] = s.Text()
 
 		s.SetAttr("id", "obscured-"+fmt.Sprint(i))
-		s.SetText(strings.Repeat("#", len(s.Text())))
+		s.SetText(strings.Repeat("#", utf8.RuneCountInString(s.Text())))
 	})
 
 	html, err := doc.Html()
@@ -138,5 +139,6 @@ func (p *Parser) ParseArticle(ctx context.Context) error {
 	return p.db.SaveArticle(ctx, store.SaveArticleParams{
 		ID:      article.ID,
 		Content: articleJson,
+		Title:   article.Title,
 	})
 }

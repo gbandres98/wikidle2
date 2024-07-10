@@ -7,34 +7,71 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 )
 
+const deleteQueueArticle = `-- name: DeleteQueueArticle :exec
+DELETE FROM article_queue
+WHERE id = $1
+`
+
+func (q *Queries) DeleteQueueArticle(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteQueueArticle, id)
+	return err
+}
+
 const getArticleByID = `-- name: GetArticleByID :one
-SELECT id, content FROM article 
+SELECT id, content, title FROM article 
 WHERE id = $1
 `
 
 func (q *Queries) GetArticleByID(ctx context.Context, id string) (Article, error) {
 	row := q.db.QueryRowContext(ctx, getArticleByID, id)
 	var i Article
-	err := row.Scan(&i.ID, &i.Content)
+	err := row.Scan(&i.ID, &i.Content, &i.Title)
+	return i, err
+}
+
+const getQueueArticle = `-- name: GetQueueArticle :one
+SELECT id, title, ondate FROM article_queue
+WHERE onDate IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GetQueueArticle(ctx context.Context) (ArticleQueue, error) {
+	row := q.db.QueryRowContext(ctx, getQueueArticle)
+	var i ArticleQueue
+	err := row.Scan(&i.ID, &i.Title, &i.Ondate)
+	return i, err
+}
+
+const getQueueArticleByDate = `-- name: GetQueueArticleByDate :one
+SELECT id, title, ondate FROM article_queue
+WHERE onDate = $1
+`
+
+func (q *Queries) GetQueueArticleByDate(ctx context.Context, ondate sql.NullString) (ArticleQueue, error) {
+	row := q.db.QueryRowContext(ctx, getQueueArticleByDate, ondate)
+	var i ArticleQueue
+	err := row.Scan(&i.ID, &i.Title, &i.Ondate)
 	return i, err
 }
 
 const saveArticle = `-- name: SaveArticle :exec
-INSERT INTO article (id, content)
-VALUES ($1, $2)
-ON CONFLICT (id) DO UPDATE SET content = $2
+INSERT INTO article (id, content, title)
+VALUES ($1, $2, $3)
+ON CONFLICT (id) DO UPDATE SET content = $2, title = $3
 `
 
 type SaveArticleParams struct {
 	ID      string
 	Content json.RawMessage
+	Title   string
 }
 
 func (q *Queries) SaveArticle(ctx context.Context, arg SaveArticleParams) error {
-	_, err := q.db.ExecContext(ctx, saveArticle, arg.ID, arg.Content)
+	_, err := q.db.ExecContext(ctx, saveArticle, arg.ID, arg.Content, arg.Title)
 	return err
 }
 

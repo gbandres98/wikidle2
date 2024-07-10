@@ -1,9 +1,12 @@
 package game
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gbandres98/wikidle2/internal/parser"
@@ -64,4 +67,27 @@ func checkGameWin(gameData GameData, article parser.Article) bool {
 	}
 
 	return remaining == 0
+}
+
+func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
+	gameID := parser.GetGameID(time.Now())
+
+	if a.cachedArticle.ID == gameID {
+		return a.cachedArticle, nil
+	}
+
+	storeArticle, err := a.db.GetArticleByID(ctx, gameID)
+	if err != nil {
+		return parser.Article{}, err
+	}
+
+	var article parser.Article
+	err = json.Unmarshal(storeArticle.Content, &article)
+	if err != nil {
+		return parser.Article{}, err
+	}
+
+	a.cachedArticle = article
+
+	return article, nil
 }

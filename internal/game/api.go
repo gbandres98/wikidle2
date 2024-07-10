@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gbandres98/wikidle2/internal/parser"
 	"github.com/gbandres98/wikidle2/internal/store"
@@ -18,8 +17,9 @@ import (
 )
 
 type Api struct {
-	db          *store.Queries
-	baseAddress string
+	db            *store.Queries
+	baseAddress   string
+	cachedArticle parser.Article
 }
 
 func New(db *store.Queries, baseAddress string) *Api {
@@ -229,23 +229,6 @@ func readCookie(r *http.Request) (PlayerData, error) {
 	}
 
 	return playerData, nil
-}
-
-func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
-	gameID := parser.GetGameID(time.Now())
-
-	storeArticle, err := a.db.GetArticleByID(ctx, gameID)
-	if err != nil {
-		return parser.Article{}, err
-	}
-
-	var article parser.Article
-	err = json.Unmarshal(storeArticle.Content, &article)
-	if err != nil {
-		return parser.Article{}, err
-	}
-
-	return article, nil
 }
 
 func (a *Api) storePlayerData(ctx context.Context, playerData PlayerData) error {

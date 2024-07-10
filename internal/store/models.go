@@ -5,12 +5,20 @@
 package store
 
 import (
+	"database/sql"
 	"encoding/json"
 )
 
 type Article struct {
 	ID      string
 	Content json.RawMessage
+	Title   string
+}
+
+type ArticleQueue struct {
+	ID     int32
+	Title  string
+	Ondate sql.NullString
 }
 
 type Game struct {
