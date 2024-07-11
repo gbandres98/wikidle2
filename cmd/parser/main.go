@@ -94,6 +94,7 @@ func start(c *cli.Context) error {
 
 		if err == nil {
 			log.Printf("Article already exists in db for game id %s\n", gameID)
+			return
 		}
 
 		log.Printf("No article in db for game id %s, parsing article from queue\n", gameID)
