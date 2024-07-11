@@ -111,7 +111,7 @@ func start(c *cli.Context) error {
 		return err
 	}
 
-	log.Println("Started cron schedule")
+	log.Printf("Started cron schedule with %s\n", cronString)
 	cr.Run()
 
 	return nil
