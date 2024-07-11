@@ -83,6 +83,20 @@ func start(c *cli.Context) error {
 	cr := cron.New()
 
 	err = cr.AddFunc(cronString, func() {
+		log.Printf("Running article parsing job at %v\n", time.Now())
+
+		gameID := parser.GetGameID(time.Now())
+
+		_, err := db.GetArticleByID(ctx, gameID)
+		if err != nil && err != sql.ErrNoRows {
+			panic(fmt.Errorf("Error getting retrieving article from db: %v", err))
+		}
+
+		if err != nil {
+			log.Printf("Article already exists in db for game id %s\n", gameID)
+		}
+
+		log.Printf("No article in db for game id %s, parsing article from queue\n", gameID)
 		articleTitle, err := p.GetArticleTitleFromQueue(ctx)
 		if err != nil {
 			panic(err)
