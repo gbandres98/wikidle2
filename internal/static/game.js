@@ -25,3 +25,7 @@ const scrollToNextWord = (index) => {
   setTimeout(() => word.classList.add("hit"), 100);
   wordScrollPosition.set(index, wordScrollPosition.get(index) + 1);
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("#attempts").scroll(0, 999999999);
+});
