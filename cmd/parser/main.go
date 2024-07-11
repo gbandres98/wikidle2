@@ -92,7 +92,7 @@ func start(c *cli.Context) error {
 			panic(fmt.Errorf("Error getting retrieving article from db: %v", err))
 		}
 
-		if err != nil {
+		if err == nil {
 			log.Printf("Article already exists in db for game id %s\n", gameID)
 		}
 
