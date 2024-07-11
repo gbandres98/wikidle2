@@ -9,7 +9,7 @@ import (
 
 	"github.com/gbandres98/wikidle2/internal/parser"
 	"github.com/gbandres98/wikidle2/internal/store"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	"github.com/urfave/cli/v2"
 )
 
@@ -82,7 +82,7 @@ func start(c *cli.Context) error {
 
 	cr := cron.New()
 
-	err = cr.AddFunc(cronString, func() {
+	_, err = cr.AddFunc(cronString, func() {
 		log.Printf("Running article parsing job at %v\n", time.Now())
 
 		gameID := parser.GetGameID(time.Now())
