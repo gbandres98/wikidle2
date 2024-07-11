@@ -105,13 +105,15 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			return
 		}
 
-		hits, err := writeHits(w, newWord, article)
+		attIndex := len(gameData.Words)
+
+		hits, err := writeHits(w, newWord, attIndex, article)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = w.Write([]byte(fmt.Sprintf(`<small>%d. %s - %d aciertos</small>`, len(gameData.Words), r.FormValue("q"), hits)))
+		_, err = w.Write([]byte(fmt.Sprintf(`<small onclick="scrollToNextWord(%d)">%d. %s - %d aciertos</small>`, attIndex, attIndex, r.FormValue("q"), hits)))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

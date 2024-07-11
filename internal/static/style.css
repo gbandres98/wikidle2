@@ -51,50 +51,35 @@ hgroup {
 }
 
 .attempts {
-    min-height: 5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
+    height: 5rem;
+	overflow-y: scroll;
     margin-bottom: 0.25rem;
 }
 
 .attempts small {
     display: block;
     margin: 0.1rem;
-    display: none;
-}
-
-.attempts small:nth-last-child(1) {
-    display: block;
-}
-
-.attempts small:nth-last-child(2) {
-    display: block;
-    opacity: 0.6;
-}
-
-.attempts small:nth-last-child(3) {
-    display: block;
-    opacity: 0.3;
+    cursor: pointer;
 }
 
 .hit {
-    animation: hit 3s 0s linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%);
+    animation: hit 2s 0s linear(0 0%, 0 1.8%, 0.01 3.6%, 0.03 6.35%, 0.07 9.1%, 0.13 11.4%, 0.19 13.4%, 0.27 15%, 0.34 16.1%, 0.54 18.35%, 0.66 20.6%, 0.72 22.4%, 0.77 24.6%, 0.81 27.3%, 0.85 30.4%, 0.88 35.1%, 0.92 40.6%, 0.94 47.2%, 0.96 55%, 0.98 64%, 0.99 74.4%, 1 86.4%, 1 100%);
 }
 
 @keyframes hit {
     0% {
-        transform: scale(1);
-        color: var(--pico-color)
+        background-color: transparent;
     }
     50% {
-        transform: scale(1.4);
-        color: #d0b873;
+        background-color: var(--pico-primary-background);
     }
     100% {
-        transform: scale(1);
-        color: var(--pico-color)
+        background-color: transparent;
     }
+}
+
+.hit {
+    border-radius: 4px;
 }
 
 figure {
@@ -115,4 +100,23 @@ table {
     table {
         width: unset;
     }
+}
+
+::-webkit-scrollbar{
+	width: 6px;
+}
+
+::-webkit-scrollbar-track-piece{
+	background-color: var(--pico-background-color);
+}
+
+::-webkit-scrollbar-thumb{
+	background-color: var(--pico-primary-background);
+	outline: 1px solid var(--pico-primary-border);
+	outline-offset: -2px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+	background-color: var(--pico-primary-hover-background);
+	outline: 1px solid var(--pico-primary-hover-border);
 }

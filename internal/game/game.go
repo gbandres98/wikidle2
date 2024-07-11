@@ -35,13 +35,15 @@ func (a *Api) init(gameData GameData, article parser.Article) (newArticle templa
 		hits := 0
 
 		if indexes, ok := article.Tokens[parser.Normalize(word)]; ok {
+			wordNumber := 0
 			for _, index := range indexes {
-				doc.Find(fmt.Sprintf("#obscured-%d", index)).First().SetText(article.Words[index])
+				doc.Find(fmt.Sprintf("#obscured-%d", index)).First().SetText(article.Words[index]).AddClass(fmt.Sprintf("word-%d-%d", i+1, wordNumber))
 				hits++
+				wordNumber++
 			}
 		}
 
-		attemptsHtml += fmt.Sprintf(`<small>%d. %s - %d aciertos</small>`, i, word, hits)
+		attemptsHtml += fmt.Sprintf(`<small onclick="scrollToNextWord(%d)">%d. %s - %d aciertos</small>`, i+1, i+1, word, hits)
 	}
 
 	articleHtml, err := doc.Html()
@@ -93,17 +95,17 @@ func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
 	return article, nil
 }
 
-func writeHits(w http.ResponseWriter, word string, article parser.Article) (int, error) {
+func writeHits(w http.ResponseWriter, word string, attIndex int, article parser.Article) (int, error) {
 	hits := 0
 
 	if indexes, ok := article.Tokens[parser.Normalize(word)]; ok {
-		for _, i := range indexes {
+		for n, i := range indexes {
 			word, ok := article.Words[i]
 			if !ok {
 				continue
 			}
 
-			_, err := w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="hit">%s</span>`, i, word)))
+			_, err := w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="hit word-%d-%d">%s</span>`, i, attIndex, n, word)))
 			if err != nil {
 				return 0, err
 			}
