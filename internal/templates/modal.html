@@ -1,0 +1,25 @@
+<dialog id="game-win-modal" class="pico" hx-swap-oob="outerHTML">
+  <article>
+    <header>
+      <button
+        aria-label="Cerrar"
+        rel="prev"
+        onclick="toggleModal(event)"
+      ></button>
+      <h4>
+        <strong>Acertaste el artículo de hoy!</strong>
+      </h4>
+      <p style="margin-bottom: 0">
+        <strong>{{ .ArticleTitle }} - en {{ .Attempts }} palabras</strong>
+      </p>
+    </header>
+    <p>
+      {{ .TotalWins }} de {{ .TotalPlayers }} personas adivinaron el artículo
+      hoy.
+    </p>
+    <p>Llevas una racha de {{ .Streak }} días 😎</p>
+    <div style="max-height: 10rem; overflow-y: auto">
+      {{ range .Words }} {{ . }} {{ end }}
+    </div>
+  </article>
+</dialog>

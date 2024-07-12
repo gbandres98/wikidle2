@@ -46,7 +46,8 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		gameData, ok := playerData.Games[article.ID]
 		if !ok {
 			gameData = GameData{
-				Words: []string{},
+				Words:   []string{},
+				Article: article.Title,
 			}
 		}
 
@@ -91,6 +92,12 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			}
 
 			_, err = w.Write([]byte(fmt.Sprintf(`<p id="motd" hx-swap-oob="true">Adivinaste el artículo de hoy en %d intentos!</p>`, len(gameData.Words))))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			err = a.writeGameWinModal(r.Context(), w, article, playerData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -150,9 +157,16 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		motd := "Adivina el artículo de hoy"
 
+		modal := template.HTML("")
+
 		if won {
 			newArticle = article.UnobscuredHTML
 			motd = fmt.Sprintf("Adivinaste el artículo de hoy en %d intentos!", len(gameData.Words))
+			modal, err = a.getGameWinModalContent(r.Context(), article, playerData)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		err = templates.Execute(w, "index.html", struct {
@@ -161,12 +175,14 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			Attempts template.HTML
 			MOTD     string
 			Won      bool
+			Modal    template.HTML
 		}{
 			BaseUrl:  a.baseAddress,
 			Article:  newArticle,
 			Attempts: attempts,
 			MOTD:     motd,
 			Won:      won,
+			Modal:    modal,
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -194,7 +210,7 @@ func (a *Api) saveCookie(w http.ResponseWriter, playerData PlayerData) error {
 		Name:     "playerData",
 		Value:    base64Data,
 		Path:     "/",
-		MaxAge:   0,
+		MaxAge:   31536000,
 		HttpOnly: true,
 	}
 

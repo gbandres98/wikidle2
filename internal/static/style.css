@@ -121,6 +121,6 @@ table {
 	outline: 1px solid var(--pico-primary-hover-border);
 }
 
-.article {
+#article {
     overflow: clip;
 }

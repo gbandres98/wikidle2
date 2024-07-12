@@ -33,6 +33,18 @@ func (q *Queries) GetArticleByID(ctx context.Context, id string) (Article, error
 	return i, err
 }
 
+const getGameCountByGameID = `-- name: GetGameCountByGameID :one
+SELECT COUNT(*) FROM game
+WHERE game_id = $1
+`
+
+func (q *Queries) GetGameCountByGameID(ctx context.Context, gameID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getGameCountByGameID, gameID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getQueueArticle = `-- name: GetQueueArticle :one
 SELECT id, title, ondate FROM article_queue
 WHERE onDate IS NULL
@@ -56,6 +68,19 @@ func (q *Queries) GetQueueArticleByDate(ctx context.Context, ondate sql.NullStri
 	var i ArticleQueue
 	err := row.Scan(&i.ID, &i.Title, &i.Ondate)
 	return i, err
+}
+
+const getWinCountByGameID = `-- name: GetWinCountByGameID :one
+select COUNT(*) from game 
+where game_id = $1 
+and game_data->>'Won' = 'true'
+`
+
+func (q *Queries) GetWinCountByGameID(ctx context.Context, gameID string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getWinCountByGameID, gameID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const saveArticle = `-- name: SaveArticle :exec

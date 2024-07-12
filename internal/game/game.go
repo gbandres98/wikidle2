@@ -14,8 +14,9 @@ import (
 )
 
 type GameData struct {
-	Words []string
-	Won   bool
+	Words   []string
+	Won     bool
+	Article string
 }
 
 type PlayerData struct {

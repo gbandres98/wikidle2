@@ -24,3 +24,13 @@ LIMIT 1;
 -- name: DeleteQueueArticle :exec
 DELETE FROM article_queue
 WHERE id = $1;
+
+-- name: GetGameCountByGameID :one
+SELECT COUNT(*) FROM game
+WHERE game_id = $1;
+
+-- name: GetWinCountByGameID :one
+select COUNT(*) from game 
+where game_id = $1 
+and game_data->>'Won' = 'true';
+
