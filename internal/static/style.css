@@ -120,3 +120,7 @@ table {
 	background-color: var(--pico-primary-hover-background);
 	outline: 1px solid var(--pico-primary-hover-border);
 }
+
+.article {
+    overflow: clip;
+}
