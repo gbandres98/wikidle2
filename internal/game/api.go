@@ -125,6 +125,12 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		err = a.writeClue(w, article, attIndex)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -170,19 +176,21 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		}
 
 		err = templates.Execute(w, "index.html", struct {
-			BaseUrl  string
-			Article  template.HTML
-			Attempts template.HTML
-			MOTD     string
-			Won      bool
-			Modal    template.HTML
+			BaseUrl           string
+			Article           template.HTML
+			Attempts          template.HTML
+			MOTD              string
+			Won               bool
+			Modal             template.HTML
+			SearchPlaceholder string
 		}{
-			BaseUrl:  a.baseAddress,
-			Article:  newArticle,
-			Attempts: attempts,
-			MOTD:     motd,
-			Won:      won,
-			Modal:    modal,
+			BaseUrl:           a.baseAddress,
+			Article:           newArticle,
+			Attempts:          attempts,
+			MOTD:              motd,
+			Won:               won,
+			Modal:             modal,
+			SearchPlaceholder: "Prueba una palabra...",
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -29,6 +29,7 @@ type Article struct {
 	Words          map[int]string
 	HTML           template.HTML
 	UnobscuredHTML template.HTML
+	Clues          []string
 }
 
 func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
@@ -39,6 +40,13 @@ func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 		TitleTokens: make([]string, 0),
 		Words:       make(map[int]string),
 	}
+
+	related, err := p.parseRelated(ctx, articleTitle)
+	if err != nil {
+		return err
+	}
+
+	article.Clues = related
 
 	article.Title = strings.Replace(article.Title, "_", " ", -1)
 

@@ -34,13 +34,7 @@
             hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);"
           >
             <div class="word-input-wrapper" id="word-input-wrapper">
-              <input
-                class="word-input"
-                name="q"
-                id="search"
-                placeholder="Prueba una palabra..."
-                autocomplete="off"
-              />
+              {{ template "search.html" . }}
               <button class="word-input-button" type="submit">
                 <img src="{{ .BaseUrl }}/img/search.svg" alt="Buscar" />
               </button>

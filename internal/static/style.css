@@ -32,6 +32,7 @@ h4 {
 
 .word-input-wrapper {
     display: flex;
+    min-width: 21rem
 }
 
 .word-input-wrapper .word-input {
