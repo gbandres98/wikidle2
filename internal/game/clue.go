@@ -13,7 +13,7 @@ func (a *Api) writeClue(w http.ResponseWriter, article parser.Article, attemptNu
 		return nil
 	}
 
-	if attemptNumber < 51 {
+	if attemptNumber < 26 {
 		return nil
 	}
 
@@ -21,7 +21,7 @@ func (a *Api) writeClue(w http.ResponseWriter, article parser.Article, attemptNu
 
 	var searchPlaceholder string
 	if clueMod == 0 {
-		clueIndex := (attemptNumber / 25) - 3
+		clueIndex := (attemptNumber / 25) - 2
 
 		if clueIndex >= len(article.Clues) {
 			return nil
