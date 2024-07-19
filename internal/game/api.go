@@ -33,12 +33,14 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		article, err := a.getArticleOfTheDay(r.Context())
 		if err != nil {
+			log.Printf("36 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		playerData, err := readCookie(r)
 		if err != nil {
+			log.Printf("42 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -53,12 +55,14 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		newWord := r.FormValue("q")
 		if len(strings.TrimSpace(newWord)) == 0 {
+			log.Printf("54 - empty word\n")
 			w.WriteHeader(http.StatusAccepted)
 			return
 		}
 
 		for _, word := range gameData.Words {
 			if parser.Normalize(word) == parser.Normalize(newWord) {
+				log.Printf("61 - repeated word %+v %+v\n", word, gameData.Words)
 				w.WriteHeader(http.StatusAccepted)
 				return
 			}
@@ -66,6 +70,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		for _, word := range parser.ExcludedWords {
 			if word == parser.Normalize(newWord) {
+				log.Printf("69 - excluded word %+v\n", newWord)
 				w.WriteHeader(http.StatusAccepted)
 				return
 			}
@@ -80,6 +85,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		playerData.Games[article.ID] = gameData
 		err = a.saveCookie(w, playerData)
 		if err != nil {
+			log.Printf("82 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -87,24 +93,28 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		if won {
 			_, err := w.Write([]byte(fmt.Sprintf(`<div id="article" hx-swap-oob="true">%s</div>`, string(article.UnobscuredHTML))))
 			if err != nil {
+				log.Printf("90 - %v\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			_, err = w.Write([]byte(fmt.Sprintf(`<p id="motd" hx-swap-oob="true">Adivinaste el artículo de hoy en %d intentos!</p>`, len(gameData.Words))))
 			if err != nil {
+				log.Printf("96 - %v\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			err = a.writeGameWinModal(r.Context(), w, article, playerData)
 			if err != nil {
+				log.Printf("103 - %v\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			_, err = w.Write([]byte(`<script>onGameWin();</script>`))
 			if err != nil {
+				log.Printf("110 - %v\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -116,18 +126,21 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		hits, err := writeHits(w, newWord, attIndex, article)
 		if err != nil {
+			log.Printf("120 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		_, err = w.Write([]byte(fmt.Sprintf(`<small onclick="scrollToNextWord(%d)">%d. %s - %d aciertos</small>`, attIndex, attIndex, r.FormValue("q"), hits)))
 		if err != nil {
+			log.Printf("127 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		err = a.writeClue(w, article, attIndex)
 		if err != nil {
+			log.Printf("134 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -136,12 +149,14 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		article, err := a.getArticleOfTheDay(r.Context())
 		if err != nil {
+			log.Printf("142 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		playerData, err := readCookie(r)
 		if err != nil {
+			log.Printf("148 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
