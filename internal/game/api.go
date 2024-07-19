@@ -54,6 +54,8 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			}
 		}
 
+		log.Printf("gameData: %+v\n", gameData)
+
 		newWord := r.FormValue("q")
 		if len(strings.TrimSpace(newWord)) == 0 {
 			log.Printf("54 - empty word\n")
@@ -131,6 +133,8 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		log.Printf("hits: %d\n", hits)
 
 		_, err = w.Write([]byte(fmt.Sprintf(`<small onclick="scrollToNextWord(%d)">%d. %s - %d aciertos</small>`, attIndex, attIndex, r.FormValue("q"), hits)))
 		if err != nil {
