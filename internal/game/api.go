@@ -258,6 +258,8 @@ func readCookie(r *http.Request) (PlayerData, error) {
 		return playerData, nil
 	}
 
+	log.Println(cookie.Value)
+
 	dataBytes, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		return playerData, err
