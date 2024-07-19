@@ -33,7 +33,6 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		article, err := a.getArticleOfTheDay(r.Context())
 		if err != nil {
-			log.Printf("36 - %v\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -44,6 +43,8 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		log.Printf("playerData: %+v\n", playerData)
 
 		gameData, ok := playerData.Games[article.ID]
 		if !ok {
