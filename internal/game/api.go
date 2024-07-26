@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gbandres98/wikidle2/internal/parser"
 	"github.com/gbandres98/wikidle2/internal/store"
@@ -33,18 +34,15 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("POST /search", func(w http.ResponseWriter, r *http.Request) {
 		article, err := a.getArticleOfTheDay(r.Context())
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to get article of the day")
 			return
 		}
 
 		playerData, err := readCookie(r)
 		if err != nil {
-			log.Printf("42 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to read cookie")
 			return
 		}
-
-		log.Printf("playerData: %+v\n", playerData)
 
 		gameData, ok := playerData.Games[article.ID]
 		if !ok {
@@ -54,18 +52,14 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			}
 		}
 
-		log.Printf("gameData: %+v\n", gameData)
-
 		newWord := r.FormValue("q")
 		if len(strings.TrimSpace(newWord)) == 0 {
-			log.Printf("54 - empty word\n")
 			w.WriteHeader(http.StatusAccepted)
 			return
 		}
 
 		for _, word := range gameData.Words {
 			if parser.Normalize(word) == parser.Normalize(newWord) {
-				log.Printf("61 - repeated word %+v %+v\n", word, gameData.Words)
 				w.WriteHeader(http.StatusAccepted)
 				return
 			}
@@ -73,7 +67,6 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		for _, word := range parser.ExcludedWords {
 			if word == parser.Normalize(newWord) {
-				log.Printf("69 - excluded word %+v\n", newWord)
 				w.WriteHeader(http.StatusAccepted)
 				return
 			}
@@ -88,37 +81,32 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		playerData.Games[article.ID] = gameData
 		err = a.saveCookie(w, playerData)
 		if err != nil {
-			log.Printf("82 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to save cookie: %+v", playerData)
 			return
 		}
 
 		if won {
 			_, err := w.Write([]byte(fmt.Sprintf(`<div id="article" hx-swap-oob="true">%s</div>`, string(article.UnobscuredHTML))))
 			if err != nil {
-				log.Printf("90 - %v\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(w, err, http.StatusInternalServerError, "", "failed to write unobscured article")
 				return
 			}
 
 			_, err = w.Write([]byte(fmt.Sprintf(`<p id="motd" hx-swap-oob="true">Adivinaste el artículo de hoy en %d intentos!</p>`, len(gameData.Words))))
 			if err != nil {
-				log.Printf("96 - %v\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(w, err, http.StatusInternalServerError, "", "failed to write MOTD")
 				return
 			}
 
 			err = a.writeGameWinModal(r.Context(), w, article, playerData)
 			if err != nil {
-				log.Printf("103 - %v\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(w, err, http.StatusInternalServerError, "", "failed to write game win modal")
 				return
 			}
 
 			_, err = w.Write([]byte(`<script>onGameWin();</script>`))
 			if err != nil {
-				log.Printf("110 - %v\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(w, err, http.StatusInternalServerError, "", "failed to write onGameWin script")
 				return
 			}
 
@@ -129,24 +117,19 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		hits, err := writeHits(w, newWord, attIndex, article)
 		if err != nil {
-			log.Printf("120 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to write hits")
 			return
 		}
 
-		log.Printf("hits: %d\n", hits)
-
 		_, err = w.Write([]byte(fmt.Sprintf(`<small onclick="scrollToNextWord(%d)">%d. %s - %d aciertos</small>`, attIndex, attIndex, r.FormValue("q"), hits)))
 		if err != nil {
-			log.Printf("127 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to write hit word")
 			return
 		}
 
 		err = a.writeClue(w, article, attIndex)
 		if err != nil {
-			log.Printf("134 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to write clue")
 			return
 		}
 	})
@@ -154,15 +137,13 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		article, err := a.getArticleOfTheDay(r.Context())
 		if err != nil {
-			log.Printf("142 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to get article of the day")
 			return
 		}
 
 		playerData, err := readCookie(r)
 		if err != nil {
-			log.Printf("148 - %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to read cookie")
 			return
 		}
 
@@ -177,7 +158,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 
 		newArticle, attempts, err := a.init(gameData, article)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to init game")
 			return
 		}
 
@@ -190,7 +171,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			motd = fmt.Sprintf("Adivinaste el artículo de hoy en %d intentos!", len(gameData.Words))
 			modal, err = a.getGameWinModalContent(r.Context(), article, playerData)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Error(w, err, http.StatusInternalServerError, "", "failed to get game win modal content")
 				return
 			}
 		}
@@ -213,7 +194,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 			SearchPlaceholder: "Prueba una palabra...",
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Error(w, err, http.StatusInternalServerError, "", "failed to execute template")
 			return
 		}
 	})
@@ -226,6 +207,18 @@ func (a *Api) saveCookie(w http.ResponseWriter, playerData PlayerData) error {
 			log.Printf("failed to store player data: %v\n", err)
 		}
 	}()
+
+	todayGameID := parser.GetGameID(time.Now())
+
+	for gameID, game := range playerData.Games {
+		if gameID == todayGameID {
+			continue
+		}
+
+		game.Words = []string{}
+
+		playerData.Games[gameID] = game
+	}
 
 	dataBytes, err := json.Marshal(playerData)
 	if err != nil {
@@ -258,8 +251,6 @@ func readCookie(r *http.Request) (PlayerData, error) {
 		return playerData, nil
 	}
 
-	log.Println(cookie.Value)
-
 	dataBytes, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		return playerData, err
@@ -274,21 +265,37 @@ func readCookie(r *http.Request) (PlayerData, error) {
 }
 
 func (a *Api) storePlayerData(ctx context.Context, playerData PlayerData) error {
-	for gameID, game := range playerData.Games {
-		data, err := json.Marshal(game)
-		if err != nil {
-			return err
-		}
+	gameID := parser.GetGameID(time.Now())
 
-		err = a.db.SaveGame(ctx, store.SaveGameParams{
-			PlayerID: playerData.ID,
-			GameID:   gameID,
-			GameData: json.RawMessage(data),
-		})
-		if err != nil {
-			return err
-		}
+	game, ok := playerData.Games[gameID]
+	if !ok {
+		return nil
+	}
+
+	data, err := json.Marshal(game)
+	if err != nil {
+		return err
+	}
+
+	err = a.db.SaveGame(ctx, store.SaveGameParams{
+		PlayerID: playerData.ID,
+		GameID:   gameID,
+		GameData: json.RawMessage(data),
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func Error(w http.ResponseWriter, err error, code int, message string, logMessage string, logArgs ...interface{}) {
+	if message == "" {
+		message = "Lo siento, ha ocurrido un error."
+	}
+
+	log.Printf(logMessage+"\n", logArgs...)
+	log.Println(err)
+
+	http.Error(w, message, code)
 }
