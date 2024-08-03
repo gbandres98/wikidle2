@@ -86,7 +86,7 @@ func (a *Api) RegisterHandlers(mux *http.ServeMux) {
 		}
 
 		if won {
-			_, err := w.Write([]byte(fmt.Sprintf(`<div id="article" hx-swap-oob="true">%s</div>`, string(article.UnobscuredHTML))))
+			_, err := w.Write([]byte(fmt.Sprintf(`<div id="article" hx-swap-oob="true"><base href="//es.wikipedia.org/wiki/">%s</div>`, string(article.UnobscuredHTML))))
 			if err != nil {
 				Error(w, err, http.StatusInternalServerError, "", "failed to write unobscured article")
 				return
