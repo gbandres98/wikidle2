@@ -31,6 +31,7 @@
             hx-post="{{ .BaseUrl }}/search"
             hx-swap="beforeend"
             hx-target="#attempts"
+            hx-on::before-request="unhighlightWords();"
             hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);"
           >
             <div class="word-input-wrapper" id="word-input-wrapper">

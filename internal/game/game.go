@@ -106,7 +106,7 @@ func writeHits(w http.ResponseWriter, word string, attIndex int, article parser.
 				continue
 			}
 
-			_, err := w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="hit word-%d-%d">%s</span>`, i, attIndex, n, word)))
+			_, err := w.Write([]byte(fmt.Sprintf(`<span id="obscured-%d" hx-swap-oob="true" class="word-%d-%d highlight">%s</span>`, i, attIndex, n, word)))
 			if err != nil {
 				return 0, err
 			}

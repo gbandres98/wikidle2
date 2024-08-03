@@ -113,3 +113,9 @@ document.addEventListener("scroll", () => {
     }
   }
 });
+
+const unhighlightWords = () => {
+  document.querySelectorAll(`.highlight`).forEach((e) => {
+    e.classList.remove("highlight");
+  });
+};

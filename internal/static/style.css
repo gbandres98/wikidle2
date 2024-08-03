@@ -139,3 +139,13 @@ table {
 .hidden {
     display: none;
 }
+
+.highlight {
+    background-color: #fdedbc;
+}
+
+@media (prefers-color-scheme: dark) {
+    .highlight {
+        background-color: #5b4400;
+    }
+}
