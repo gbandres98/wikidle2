@@ -45,6 +45,9 @@
       <main class="container">
         <div id="article">{{ .Article }}</div>
       </main>
+      <button id="up-button" class="up-button hidden" onclick="scrollToTop()">
+        <img src="{{ .BaseUrl }}/img/arrow-big-up-line.svg" alt="Subir" />
+      </button>
       {{ if eq .Modal "" }}
       <dialog id="game-win-modal" class="pico"></dialog>
       {{ else }} {{ .Modal }} {{ end }}

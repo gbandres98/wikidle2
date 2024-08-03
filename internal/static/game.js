@@ -98,3 +98,18 @@ const getScrollbarWidth = () => {
 const isScrollbarVisible = () => {
   return document.body.scrollHeight > screen.height;
 };
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+document.addEventListener("scroll", () => {
+  const scrollButton = document.getElementById("up-button");
+  if (scrollButton) {
+    if (window.scrollY > 200) {
+      scrollButton.classList.remove("hidden");
+    } else {
+      scrollButton.classList.add("hidden");
+    }
+  }
+});

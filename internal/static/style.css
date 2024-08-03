@@ -125,3 +125,17 @@ table {
 #article {
     overflow: clip;
 }
+
+.up-button {
+    position: fixed;
+    bottom: 5%;
+    right: 5%;
+    background-color: var(--pico-primary-background);
+    border: var(--pico-border-width) solid var(--pico-border-color);
+    border-radius: var(--pico-border-radius);
+    padding: 10px;
+}
+
+.hidden {
+    display: none;
+}
