@@ -20,13 +20,15 @@ import (
 type Api struct {
 	db            *store.Queries
 	baseAddress   string
+	articleCache  bool
 	cachedArticle parser.Article
 }
 
-func New(db *store.Queries, baseAddress string) *Api {
+func New(db *store.Queries, baseAddress string, articleCache bool) *Api {
 	return &Api{
-		db:          db,
-		baseAddress: baseAddress,
+		db:           db,
+		baseAddress:  baseAddress,
+		articleCache: articleCache,
 	}
 }
 
@@ -227,15 +229,7 @@ func (a *Api) saveCookie(w http.ResponseWriter, playerData PlayerData) error {
 
 	base64Data := base64.StdEncoding.EncodeToString(dataBytes)
 
-	cookie := http.Cookie{
-		Name:     "playerData",
-		Value:    base64Data,
-		Path:     "/",
-		MaxAge:   31536000,
-		HttpOnly: true,
-	}
-
-	http.SetCookie(w, &cookie)
+	w.Header().Add("HX-Trigger", fmt.Sprintf(`{ "afterResponse": "%s" }`, base64Data))
 
 	return nil
 }
@@ -246,12 +240,12 @@ func readCookie(r *http.Request) (PlayerData, error) {
 		Games: map[string]GameData{},
 	}
 
-	cookie, err := r.Cookie("playerData")
-	if err != nil {
+	cookie := r.Header.Get("gameData")
+	if cookie == "" {
 		return playerData, nil
 	}
 
-	dataBytes, err := base64.StdEncoding.DecodeString(cookie.Value)
+	dataBytes, err := base64.StdEncoding.DecodeString(cookie)
 	if err != nil {
 		return playerData, err
 	}

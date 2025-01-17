@@ -76,7 +76,7 @@ func checkGameWin(gameData GameData, article parser.Article) bool {
 func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
 	gameID := parser.GetGameID(time.Now())
 
-	if a.cachedArticle.ID == gameID {
+	if a.articleCache && a.cachedArticle.ID == gameID {
 		return a.cachedArticle, nil
 	}
 

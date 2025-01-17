@@ -13,6 +13,7 @@ import (
 )
 
 var dbUrl, dbDriver, addr, baseAddress string
+var articleCache bool
 
 func main() {
 	app := &cli.App{
@@ -48,6 +49,13 @@ func main() {
 				Value:       "http://192.168.1.100:8080",
 				Destination: &baseAddress,
 			},
+			&cli.BoolFlag{
+				Name:        "article-cache",
+				EnvVars:     []string{"WIKIDLE_ARTICLE_CACHE"},
+				Usage:       "Use article cache",
+				Value:       true,
+				Destination: &articleCache,
+			},
 		},
 	}
 
@@ -68,7 +76,7 @@ func start(c *cli.Context) error {
 
 	mux.Handle("GET /{file...}", http.FileServerFS(static.FS()))
 
-	game := game.New(db, baseAddress)
+	game := game.New(db, baseAddress, articleCache)
 	game.RegisterHandlers(mux)
 
 	log.Printf("Server started at %s\n", addr)

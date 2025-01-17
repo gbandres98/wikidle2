@@ -14,6 +14,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="{{ .BaseUrl }}/game.js"></script>
+    <script src="{{ .BaseUrl }}/storage.js"></script>
     <link rel="stylesheet" href="{{ .BaseUrl }}/style.css" />
     <link rel="stylesheet" href="{{ .BaseUrl }}/pico-modal.css" />
     <title>Wikidle</title>
@@ -32,6 +33,7 @@
             hx-swap="beforeend"
             hx-target="#attempts"
             hx-on::before-request="unhighlightWords();"
+            hx-on::config-request="beforeRequest(event);"
             hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);"
           >
             <div class="word-input-wrapper" id="word-input-wrapper">
