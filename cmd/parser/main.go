@@ -15,7 +15,7 @@ import (
 )
 
 var dbUrl, dbDriver, cronString, addr, forceTitle string
-var force bool
+var force, show bool
 
 func main() {
 	app := &cli.App{
@@ -58,10 +58,16 @@ func main() {
 				Destination: &force,
 			},
 			&cli.StringFlag{
-				Name:        "force-title",
+				Name:        "title",
 				Usage:       "Article name when forcing a new article",
 				Value:       "",
 				Destination: &forceTitle,
+			},
+			&cli.BoolFlag{
+				Name:        "show",
+				Usage:       "Show parsed article name when forcing a new article",
+				Value:       false,
+				Destination: &show,
 			},
 		},
 	}
@@ -89,6 +95,9 @@ func start(c *cli.Context) error {
 			}
 		}
 
+		if show {
+			log.Println(forceTitle)
+		}
 		return p.ParseArticle(ctx, forceTitle)
 	}
 

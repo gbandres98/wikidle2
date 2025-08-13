@@ -1,22 +1,26 @@
 package parser
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 type relatedResponse struct {
 	Query struct {
 		Pages []struct {
-			Title string `json:"title"`
+			Categories []struct {
+				Title string `json:"title"`
+			} `json:"categories"`
 		} `json:"pages"`
 	} `json:"query"`
 }
 
-func (p *Parser) parseRelated(ctx context.Context, articleTitle string) ([]string, error) {
-	url := fmt.Sprintf("https://es.wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query&generator=search&gsrnamespace=0&gsrlimit=10&gsrqiprofile=classic&uselang=content&gsrsearch=morelike:%s", articleTitle)
+func (p *Parser) parseRelated(articleTitle string) ([]string, error) {
+	url := fmt.Sprintf("https://es.wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query&prop=categories&titles=%s", url.PathEscape(articleTitle))
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -25,12 +29,16 @@ func (p *Parser) parseRelated(ctx context.Context, articleTitle string) ([]strin
 
 	var related relatedResponse
 	if err := json.NewDecoder(res.Body).Decode(&related); err != nil {
+		log.Println(url)
 		return nil, fmt.Errorf("error decoding related articles: %w", err)
 	}
 
 	var relatedTitles []string
-	for _, page := range related.Query.Pages {
-		relatedTitles = append(relatedTitles, page.Title)
+	for _, category := range related.Query.Pages[0].Categories {
+		titleSplit := strings.Split(category.Title, ":")
+		title := titleSplit[len(titleSplit)-1]
+
+		relatedTitles = append(relatedTitles, title)
 	}
 
 	return relatedTitles, nil

@@ -42,14 +42,12 @@ func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 		Words:       make(map[int]string),
 	}
 
-	related, err := p.parseRelated(ctx, articleTitle)
+	related, err := p.parseRelated(articleTitle)
 	if err != nil {
 		return err
 	}
 
 	article.Clues = related
-
-	article.Title = strings.Replace(article.Title, "_", " ", -1)
 
 	res, err := http.Get("https://es.wikipedia.org/api/rest_v1/page/html/" + url.PathEscape(article.Title))
 	if err != nil {

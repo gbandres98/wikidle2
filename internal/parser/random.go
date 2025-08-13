@@ -9,16 +9,16 @@ import (
 	"time"
 )
 
-type wikipediaRandomArticleResponseItem struct {
-	Title string `json:"title"`
-}
-
 type wikipediaRandomArticleResponse struct {
-	Items []wikipediaRandomArticleResponseItem `json:"items"`
+	Query struct {
+		Pages []struct {
+			Title string `json:"title"`
+		} `json:"pages"`
+	} `json:"query"`
 }
 
 func GetRandomArticleTitle() (string, error) {
-	res, err := http.Get("https://es.wikipedia.org/api/rest_v1/page/random/title")
+	res, err := http.Get("https://es.wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query&generator=random&grnnamespace=0&grnminsize=50000")
 	if err != nil {
 		return "", fmt.Errorf("failed to call random article api: %w", err)
 	}
@@ -29,11 +29,11 @@ func GetRandomArticleTitle() (string, error) {
 		return "", fmt.Errorf("failed to decode random article response: %w", err)
 	}
 
-	if len(response.Items) < 1 {
+	if len(response.Query.Pages) < 1 {
 		return "", fmt.Errorf("no items in random article response")
 	}
 
-	return response.Items[0].Title, nil
+	return response.Query.Pages[0].Title, nil
 }
 
 func (p *Parser) GetArticleTitleFromQueue(ctx context.Context) (string, error) {
