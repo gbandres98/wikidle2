@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -151,6 +152,7 @@ func (p *Parser) ParseArticle(ctx context.Context, articleTitle string) error {
 		return err
 	}
 
+	log.Println("Successfully parsed article")
 	return p.db.SaveArticle(ctx, store.SaveArticleParams{
 		ID:      article.ID,
 		Content: articleJson,

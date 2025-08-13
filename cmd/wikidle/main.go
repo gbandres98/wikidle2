@@ -74,6 +74,7 @@ func start(c *cli.Context) error {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {})
 	mux.Handle("GET /{file...}", http.FileServerFS(static.FS()))
 
 	game := game.New(db, baseAddress, articleCache)

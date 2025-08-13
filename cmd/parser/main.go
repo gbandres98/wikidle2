@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var dbUrl, dbDriver, cronString string
+var dbUrl, dbDriver, cronString, addr string
 
 func main() {
 	app := &cli.App{
@@ -41,6 +42,13 @@ func main() {
 				Usage:       "Cron to run the article parsing job",
 				Value:       "0 0 * * *",
 				Destination: &cronString,
+			},
+			&cli.StringFlag{
+				Name:        "listen-addr",
+				EnvVars:     []string{"WIKIDLE_LISTEN_ADDRESS"},
+				Usage:       "Address to listen on",
+				Value:       "0.0.0.0:8080",
+				Destination: &addr,
 			},
 		},
 	}
@@ -109,6 +117,14 @@ func start(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	go func() {
+		mux := http.DefaultServeMux
+		mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {})
+
+		err := http.ListenAndServe(addr, mux)
+		log.Println(err)
+	}()
 
 	log.Printf("Started cron schedule with %s\n", cronString)
 	cr.Run()
