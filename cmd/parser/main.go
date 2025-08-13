@@ -14,7 +14,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var dbUrl, dbDriver, cronString, addr string
+var dbUrl, dbDriver, cronString, addr, forceTitle string
+var force bool
 
 func main() {
 	app := &cli.App{
@@ -50,6 +51,18 @@ func main() {
 				Value:       "0.0.0.0:8080",
 				Destination: &addr,
 			},
+			&cli.BoolFlag{
+				Name:        "force",
+				Usage:       "Force a new article",
+				Value:       false,
+				Destination: &force,
+			},
+			&cli.StringFlag{
+				Name:        "force-title",
+				Usage:       "Article name when forcing a new article",
+				Value:       "",
+				Destination: &forceTitle,
+			},
 		},
 	}
 
@@ -67,6 +80,17 @@ func start(c *cli.Context) error {
 	}
 
 	p := parser.New(db)
+
+	if force {
+		if forceTitle == "" {
+			forceTitle, err = p.GetArticleTitleFromQueue(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		return p.ParseArticle(ctx, forceTitle)
+	}
 
 	_, err = db.GetArticleByID(ctx, parser.GetGameID(time.Now()))
 	if err != nil && err != sql.ErrNoRows {
