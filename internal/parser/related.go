@@ -8,17 +8,17 @@ import (
 )
 
 type relatedResponse struct {
-	Pages []struct {
-		Title  string `json:"title"`
-		Titles struct {
-			Canonical  string `json:"canonical"`
-			Normalized string `json:"normalized"`
-		} `json:"titles"`
-	} `json:"pages"`
+	Query struct {
+		Pages []struct {
+			Title string `json:"title"`
+		} `json:"pages"`
+	} `json:"query"`
 }
 
 func (p *Parser) parseRelated(ctx context.Context, articleTitle string) ([]string, error) {
-	res, err := http.Get(fmt.Sprintf("https://es.wikipedia.org/api/rest_v1/page/related/%s", articleTitle))
+	url := fmt.Sprintf("https://es.wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query&generator=search&gsrnamespace=0&gsrlimit=10&gsrqiprofile=classic&uselang=content&gsrsearch=morelike:%s", articleTitle)
+
+	res, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error getting related articles: %w", err)
 	}
@@ -29,8 +29,8 @@ func (p *Parser) parseRelated(ctx context.Context, articleTitle string) ([]strin
 	}
 
 	var relatedTitles []string
-	for _, page := range related.Pages {
-		relatedTitles = append(relatedTitles, page.Titles.Normalized)
+	for _, page := range related.Query.Pages {
+		relatedTitles = append(relatedTitles, page.Title)
 	}
 
 	return relatedTitles, nil

@@ -10,7 +10,6 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/forceParse",
-            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "API",
@@ -18,7 +17,6 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/wikidle",
-            "envFile": "${workspaceFolder}/.env"
         },
     ]
 }

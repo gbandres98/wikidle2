@@ -26,7 +26,6 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_DATABASE_DRIVER"},
 				Usage:       "Database driver to use (sqlite3, postgres)",
 				Value:       "sqlite3",
-				Required:    true,
 				Destination: &dbDriver,
 			},
 			&cli.StringFlag{
@@ -34,7 +33,6 @@ func main() {
 				EnvVars:     []string{"WIKIDLE_DATABASE_DSN"},
 				Usage:       "Database connection string",
 				Value:       "file::memory:?cache=shared",
-				Required:    true,
 				Destination: &dbUrl,
 			},
 			&cli.StringFlag{
