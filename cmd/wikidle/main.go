@@ -46,7 +46,7 @@ func main() {
 				Name:        "base-addr",
 				EnvVars:     []string{"WIKIDLE_BASE_ADDRESS"},
 				Usage:       "Base address for web content",
-				Value:       "http://192.168.1.100:8080",
+				Value:       "http://127.0.0.1:8080",
 				Destination: &baseAddress,
 			},
 			&cli.BoolFlag{

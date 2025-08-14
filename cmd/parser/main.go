@@ -53,18 +53,21 @@ func main() {
 			},
 			&cli.BoolFlag{
 				Name:        "force",
+				Aliases:     []string{"f"},
 				Usage:       "Force a new article",
 				Value:       false,
 				Destination: &force,
 			},
 			&cli.StringFlag{
 				Name:        "title",
+				Aliases:     []string{"t"},
 				Usage:       "Article name when forcing a new article",
 				Value:       "",
 				Destination: &forceTitle,
 			},
 			&cli.BoolFlag{
 				Name:        "show",
+				Aliases:     []string{"s"},
 				Usage:       "Show parsed article name when forcing a new article",
 				Value:       false,
 				Destination: &show,
