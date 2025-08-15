@@ -7,24 +7,12 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gbandres98/wikidle2/internal/parser"
 )
 
-type GameData struct {
-	Words   []string
-	Won     bool
-	Article string
-}
-
-type PlayerData struct {
-	ID    string
-	Games map[string]GameData
-}
-
-func (a *Api) init(gameData GameData, article parser.Article) (newArticle template.HTML, attempts template.HTML, err error) {
+func (a *Api) init(gameData *GameData, article parser.Article) (newArticle template.HTML, attempts template.HTML, err error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(article.HTML)))
 	if err != nil {
 		return "", "", err
@@ -58,7 +46,7 @@ func (a *Api) init(gameData GameData, article parser.Article) (newArticle templa
 	return
 }
 
-func checkGameWin(gameData GameData, article parser.Article) bool {
+func checkGameWin(gameData *GameData, article parser.Article) bool {
 	remaining := len(article.TitleTokens)
 
 	for _, titleToken := range article.TitleTokens {
@@ -73,14 +61,12 @@ func checkGameWin(gameData GameData, article parser.Article) bool {
 	return remaining == 0
 }
 
-func (a *Api) getArticleOfTheDay(ctx context.Context) (parser.Article, error) {
-	gameID := parser.GetGameID(time.Now())
-
-	if a.articleCache && a.cachedArticle.ID == gameID {
+func (a *Api) getArticleOfTheDay(ctx context.Context, articleID string) (parser.Article, error) {
+	if a.articleCache && a.cachedArticle.ID == articleID {
 		return a.cachedArticle, nil
 	}
 
-	storeArticle, err := a.db.GetArticleByID(ctx, gameID)
+	storeArticle, err := a.db.GetArticleByID(ctx, articleID)
 	if err != nil {
 		return parser.Article{}, err
 	}
