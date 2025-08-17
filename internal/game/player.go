@@ -73,14 +73,6 @@ func (a *Api) writePlayerDataHeader(w http.ResponseWriter, playerData *PlayerDat
 
 	encodedString := base64.StdEncoding.EncodeToString(buf.Bytes())
 	log.Println(encodedString)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:    "gameData",
-		Value:   encodedString,
-		Expires: time.Now().AddDate(0, 0, 400),
-		Path:    "/",
-		Domain:  a.baseAddress,
-	})
 }
 
 func readPlayerDataHeader(r *http.Request, articleID string) (*PlayerData, error) {

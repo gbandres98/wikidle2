@@ -6,13 +6,9 @@
     <meta name="color-scheme" content="light dark" />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.conditional.sand.min.css"
+      href="{{ .BaseUrl }}/pico.conditional.sand.min.css"
     />
-    <script
-      src="https://unpkg.com/htmx.org@2.0.0"
-      integrity="sha384-wS5l5IKJBvK6sPTKa2WZ1js3d947pvWXbPJ1OmWfEuxLgeHcEbjUUA5i9V5ZkpCw"
-      crossorigin="anonymous"
-    ></script>
+    <script src="{{ .BaseUrl }}/htmx.min.js"></script>
     <script src="{{ .BaseUrl }}/game.js"></script>
     <script src="{{ .BaseUrl }}/storage.js"></script>
     <link rel="stylesheet" href="{{ .BaseUrl }}/style.css" />
@@ -46,7 +42,17 @@
         </div>
       </div>
       <main class="container">
-        <div id="article">{{ .Article }}</div>
+        <div
+          id="article"
+          hx-post="{{ .BaseUrl }}/init"
+          hx-trigger="load"
+          hx-swap="beforeend"
+          hx-target="#attempts"
+          hx-on::before-request="unhighlightWords();"
+          hx-on::config-request="beforeRequest(event);"
+        >
+          {{ .Article }}
+        </div>
       </main>
       <button id="up-button" class="up-button hidden" onclick="scrollToTop()">
         <img src="{{ .BaseUrl }}/img/arrow-big-up-line.svg" alt="Subir" />

@@ -1,8 +1,10 @@
 const beforeRequest = (event) => {
   const gameData = localStorage.getItem("gameData");
 
+  console.log(event);
+
   if (gameData) {
-    event.detail.headers["gameData"] = gameData;
+    event.detail.formData.set("gameData", gameData);
   }
 };
 

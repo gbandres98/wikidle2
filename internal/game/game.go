@@ -12,7 +12,7 @@ import (
 	"github.com/gbandres98/wikidle2/internal/parser"
 )
 
-func (a *Api) init(gameData *GameData, article parser.Article) (newArticle template.HTML, attempts template.HTML, err error) {
+func (a *Api) init(gameData *GameData, article parser.Article, w http.ResponseWriter) (newArticle template.HTML, attempts template.HTML, err error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(string(article.HTML)))
 	if err != nil {
 		return "", "", err

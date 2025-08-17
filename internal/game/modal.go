@@ -56,12 +56,3 @@ func (a *Api) writeGameWinModal(ctx context.Context, w http.ResponseWriter, arti
 
 	return templates.Execute(w, "modal.html", tmplData)
 }
-
-func (a *Api) getGameWinModalContent(ctx context.Context, article parser.Article, playerData *PlayerData) (template.HTML, error) {
-	tmplData, err := a.createGameWinModalData(ctx, article, playerData)
-	if err != nil {
-		return "", fmt.Errorf("failed to create game win modal data: %w", err)
-	}
-
-	return templates.Render("modal.html", tmplData)
-}
