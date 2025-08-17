@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -72,7 +73,18 @@ func (a *Api) writePlayerDataHeader(w http.ResponseWriter, playerData *PlayerDat
 	gz.Close()
 
 	encodedString := base64.StdEncoding.EncodeToString(buf.Bytes())
-	log.Println(encodedString)
+
+	log.Println("------")
+
+	log.Printf("gzip: %d\n", len(encodedString))
+
+	js, _ := json.Marshal(playerData)
+
+	log.Printf("json: %d\n", len(js))
+
+	log.Printf("base64: %d\n", len(base64.StdEncoding.EncodeToString(js)))
+
+	_, err = w.Write([]byte(fmt.Sprintf(`<span id="game-data" hx-swap-oob="true">%s</span>`, js)))
 }
 
 func readPlayerDataHeader(r *http.Request, articleID string) (*PlayerData, error) {
@@ -84,12 +96,12 @@ func readPlayerDataHeader(r *http.Request, articleID string) (*PlayerData, error
 		},
 	}
 
-	cookie, err := r.Cookie("gameData")
-	if err != nil || cookie.Value == "" {
+	data := r.FormValue("gameData")
+	if data == "" {
 		return playerData, nil
 	}
 
-	err = json.Unmarshal([]byte(cookie.Value), playerData)
+	err := json.Unmarshal([]byte(data), playerData)
 	if err != nil {
 		log.Printf("error unmarshalling player data: %s", err)
 		return playerData, nil

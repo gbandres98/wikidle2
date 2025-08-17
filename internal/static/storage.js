@@ -1,6 +1,7 @@
 const beforeRequest = (event) => {
   const gameData = localStorage.getItem("gameData");
 
+  console.log("beforeRequest");
   console.log(event);
 
   if (gameData) {
@@ -8,10 +9,11 @@ const beforeRequest = (event) => {
   }
 };
 
-document.addEventListener("afterResponse", (event) => {
-  const gameData = event.detail.value;
+const afterRequest = () => {
+  const gameDataContainer = document.getElementById("game-data")
 
-  if (gameData) {
-    localStorage.setItem("gameData", gameData);
-  }
-});
+  if (!gameDataContainer || gameDataContainer.textContent === "")
+    return
+
+  localStorage.setItem("gameData", gameDataContainer.textContent);
+};

@@ -30,7 +30,7 @@
             hx-target="#attempts"
             hx-on::before-request="unhighlightWords();"
             hx-on::config-request="beforeRequest(event);"
-            hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);"
+            hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);afterRequest()"
           >
             <div class="word-input-wrapper" id="word-input-wrapper">
               {{ template "search.html" . }}
@@ -48,8 +48,8 @@
           hx-trigger="load"
           hx-swap="beforeend"
           hx-target="#attempts"
-          hx-on::before-request="unhighlightWords();"
-          hx-on::config-request="beforeRequest(event);"
+          hx-on::before-request="beforeRequest(event);"
+          hx-on::after-request="afterRequest()"
         >
           {{ .Article }}
         </div>
@@ -66,5 +66,6 @@
       onGameWin();
     </script>
     {{ end }}
+    <span id="game-data" style="display: none" />
   </body>
 </html>
