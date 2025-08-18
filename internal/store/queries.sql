@@ -21,6 +21,11 @@ SELECT * FROM article_queue
 WHERE onDate IS NULL
 LIMIT 1;
 
+
+-- name: AddArticleToQueue :exec
+INSERT INTO article_queue (title)
+VALUES ($1);
+
 -- name: DeleteQueueArticle :exec
 DELETE FROM article_queue
 WHERE id = $1;

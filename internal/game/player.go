@@ -23,9 +23,10 @@ type GameData struct {
 }
 
 type PlayerData struct {
-	ID     string    `json:"i"`
-	Game   *GameData `json:"g"`
-	Streak int       `json:"s"`
+	ID         string    `json:"i"`
+	Game       *GameData `json:"g"`
+	Streak     int       `json:"s"`
+	LastStreak time.Time `json:"t"`
 }
 
 func (a *Api) playerDataMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -112,6 +113,10 @@ func readPlayerDataHeader(r *http.Request, articleID string) (*PlayerData, error
 			Words:     []string{},
 			ArticleID: articleID,
 		}
+	}
+
+	if playerData.LastStreak.Before(time.Now().AddDate(0, 0, -3)) {
+		playerData.Streak = 0
 	}
 
 	return playerData, nil

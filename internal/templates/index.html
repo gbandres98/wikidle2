@@ -30,7 +30,7 @@
             hx-target="#attempts"
             hx-on::before-request="unhighlightWords();"
             hx-on::config-request="beforeRequest(event);"
-            hx-on::after-request="this.reset();document.querySelector('#attempts').scroll(0, 999999999);afterRequest()"
+            hx-on::after-request="this.reset();afterRequest();document.querySelector('#attempts').scroll(0, 999999999)"
           >
             <div class="word-input-wrapper" id="word-input-wrapper">
               {{ template "search.html" . }}
@@ -45,11 +45,11 @@
         <div
           id="article"
           hx-post="{{ .BaseUrl }}/init"
-          hx-trigger="load"
+          hx-trigger="load delay:1ms"
           hx-swap="beforeend"
           hx-target="#attempts"
-          hx-on::before-request="beforeRequest(event);"
-          hx-on::after-request="afterRequest()"
+          hx-on::config-request="beforeRequest(event);"
+          hx-on::after-request="afterRequest();unhighlightWords();"
         >
           {{ .Article }}
         </div>

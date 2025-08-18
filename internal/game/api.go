@@ -75,6 +75,9 @@ func (a *Api) handleWordSearch(w http.ResponseWriter, r *http.Request) {
 	playerData.Game.Won = won
 
 	if won {
+		playerData.LastStreak = time.Now()
+		playerData.Streak++
+
 		_, err := w.Write([]byte(fmt.Sprintf(`<div id="article" hx-swap-oob="true"><base href="//es.wikipedia.org/wiki/">%s</div>`, string(article.UnobscuredHTML))))
 		if err != nil {
 			Error(w, err, http.StatusInternalServerError, "", "failed to write unobscured article")

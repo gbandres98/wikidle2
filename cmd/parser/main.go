@@ -2,9 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -22,6 +25,66 @@ func main() {
 		Name:   "wikidle3-api",
 		Usage:  "API server for wikidle3",
 		Action: start,
+		Commands: []*cli.Command{
+			{
+				Name:        "queue-category",
+				Description: "Queue all articles from a wikipedia category id",
+				Args:        true,
+				ArgsUsage:   "Category id to process",
+				Action:      queueCategory,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "db-driver",
+						EnvVars:     []string{"WIKIDLE_DATABASE_DRIVER"},
+						Usage:       "Database driver to use (sqlite3, postgres)",
+						Value:       "sqlite3",
+						Destination: &dbDriver,
+					},
+					&cli.StringFlag{
+						Name:        "db-dsn",
+						EnvVars:     []string{"WIKIDLE_DATABASE_DSN"},
+						Usage:       "Database connection string",
+						Value:       "file::memory:?cache=shared",
+						Destination: &dbUrl,
+					},
+				},
+			},
+			{
+				Name:        "force",
+				Description: "Replace current article with a new one",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "title",
+						Aliases:     []string{"t"},
+						Usage:       "Article name when forcing a new article",
+						Value:       "",
+						Destination: &forceTitle,
+					},
+					&cli.BoolFlag{
+						Name:        "show",
+						Aliases:     []string{"s"},
+						Usage:       "Show parsed article name when forcing a new article",
+						Value:       false,
+						Destination: &show,
+					},
+					&cli.StringFlag{
+						Name:        "db-driver",
+						EnvVars:     []string{"WIKIDLE_DATABASE_DRIVER"},
+						Usage:       "Database driver to use (sqlite3, postgres)",
+						Value:       "sqlite3",
+						Destination: &dbDriver,
+					},
+					&cli.StringFlag{
+						Name:        "db-dsn",
+						EnvVars:     []string{"WIKIDLE_DATABASE_DSN"},
+						Usage:       "Database connection string",
+						Value:       "file::memory:?cache=shared",
+						Destination: &dbUrl,
+					},
+				},
+				Action: replace,
+			},
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "db-driver",
@@ -51,27 +114,6 @@ func main() {
 				Value:       "0.0.0.0:8080",
 				Destination: &addr,
 			},
-			&cli.BoolFlag{
-				Name:        "force",
-				Aliases:     []string{"f"},
-				Usage:       "Force a new article",
-				Value:       false,
-				Destination: &force,
-			},
-			&cli.StringFlag{
-				Name:        "title",
-				Aliases:     []string{"t"},
-				Usage:       "Article name when forcing a new article",
-				Value:       "",
-				Destination: &forceTitle,
-			},
-			&cli.BoolFlag{
-				Name:        "show",
-				Aliases:     []string{"s"},
-				Usage:       "Show parsed article name when forcing a new article",
-				Value:       false,
-				Destination: &show,
-			},
 		},
 	}
 
@@ -89,20 +131,6 @@ func start(c *cli.Context) error {
 	}
 
 	p := parser.New(db)
-
-	if force {
-		if forceTitle == "" {
-			forceTitle, err = p.GetArticleTitleFromQueue(ctx)
-			if err != nil {
-				return err
-			}
-		}
-
-		if show {
-			log.Println(forceTitle)
-		}
-		return p.ParseArticle(ctx, forceTitle)
-	}
 
 	_, err = db.GetArticleByID(ctx, parser.GetGameID(time.Now()))
 	if err != nil && err != sql.ErrNoRows {
@@ -164,6 +192,101 @@ func start(c *cli.Context) error {
 
 	log.Printf("Started cron schedule with %s\n", cronString)
 	cr.Run()
+
+	return nil
+}
+
+func replace(c *cli.Context) error {
+	ctx := c.Context
+
+	db, err := store.NewDB(ctx, dbDriver, dbUrl, true)
+	if err != nil {
+		return err
+	}
+
+	p := parser.New(db)
+
+	if forceTitle == "" {
+		forceTitle, err = p.GetArticleTitleFromQueue(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	if show {
+		log.Println(forceTitle)
+	}
+	return p.ParseArticle(ctx, forceTitle)
+}
+
+func queueCategory(c *cli.Context) error {
+	ctx := c.Context
+
+	db, err := store.NewDB(ctx, dbDriver, dbUrl, true)
+	if err != nil {
+		return err
+	}
+
+	type apiResponse struct {
+		Continue struct {
+			Code string `json:"cmcontinue"`
+		} `json:"continue"`
+		Query struct {
+			Pages []struct {
+				Title string `json:"title"`
+			} `json:"categorymembers"`
+		} `json:"query"`
+	}
+
+	req, err := url.Parse("https://es.wikipedia.org/w/api.php?format=json&formatversion=2&origin=*&action=query&list=categorymembers&uselang=content&cmtitle=" + url.QueryEscape("Categoría:Wikipedia:Artículos destacados") + "&cmlimit=500")
+	if err != nil {
+		panic(err)
+	}
+
+	pages := []string{}
+	query := 1
+
+	for {
+		log.Printf("query %d", query)
+		query++
+
+		var response apiResponse
+
+		res, err := http.Get(req.String())
+		if err != nil {
+			panic(err)
+		}
+
+		err = json.NewDecoder(res.Body).Decode(&response)
+		if err != nil {
+			panic(err)
+		}
+
+		for _, page := range response.Query.Pages {
+			pages = append(pages, page.Title)
+		}
+
+		if response.Continue.Code == "" {
+			break
+		}
+
+		query := req.Query()
+		query.Set("cmcontinue", response.Continue.Code)
+
+		req.RawQuery = query.Encode()
+	}
+
+	log.Printf("got %d page names", len(pages))
+
+	rand.Shuffle(len(pages), func(i, j int) { pages[i], pages[j] = pages[j], pages[i] })
+
+	for i, page := range pages {
+		log.Printf("storing page %d of %d", i, len(pages))
+		err = db.AddArticleToQueue(ctx, page)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	return nil
 }
