@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/gbandres98/wikidle2/internal/parser"
@@ -24,12 +25,12 @@ func (a *Api) createGameWinModalData(ctx context.Context, article parser.Article
 
 	totalPlayers, err := a.db.GetGameCountByGameID(ctx, id)
 	if err != nil {
-		return modalTemplateData{}, fmt.Errorf("failed to get games by game id: %w", err)
+		log.Printf("failed to get games by game id: %v", err)
 	}
 
 	totalWins, err := a.db.GetWinCountByGameID(ctx, id)
 	if err != nil {
-		return modalTemplateData{}, fmt.Errorf("failed to get won games by game id: %w", err)
+		log.Printf("failed to get won games by game id: %v", err)
 	}
 
 	words := []template.HTML{}
