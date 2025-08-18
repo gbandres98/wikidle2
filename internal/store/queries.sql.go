@@ -58,6 +58,7 @@ func (q *Queries) GetGameCountByGameID(ctx context.Context, gameID string) (int6
 const getQueueArticle = `-- name: GetQueueArticle :one
 SELECT id, title, ondate FROM article_queue
 WHERE onDate IS NULL
+ORDER BY id DESC
 LIMIT 1
 `
 

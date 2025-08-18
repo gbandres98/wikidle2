@@ -19,6 +19,7 @@ WHERE onDate = $1;
 -- name: GetQueueArticle :one
 SELECT * FROM article_queue
 WHERE onDate IS NULL
+ORDER BY id DESC
 LIMIT 1;
 
 
