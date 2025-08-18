@@ -37,5 +37,5 @@ WHERE game_id = $1;
 -- name: GetWinCountByGameID :one
 select COUNT(*) from game 
 where game_id = $1 
-and game_data->>'Won' = 'true';
+and game_data->>'w' = true;
 

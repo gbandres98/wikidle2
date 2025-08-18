@@ -83,7 +83,7 @@ func (q *Queries) GetQueueArticleByDate(ctx context.Context, ondate sql.NullStri
 const getWinCountByGameID = `-- name: GetWinCountByGameID :one
 select COUNT(*) from game 
 where game_id = $1 
-and game_data->>'Won' = 'true'
+and game_data->>'w' = true
 `
 
 func (q *Queries) GetWinCountByGameID(ctx context.Context, gameID string) (int64, error) {
